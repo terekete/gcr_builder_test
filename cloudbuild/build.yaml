@@ -7,7 +7,7 @@ steps:
     args:
     - '-c'
     - |
-      gcloud secrets versions access ${_KEY_VERSION} --secret="gcr-builder" --project=${_KEY_PROJECT}  > /root/.ssh/id_rsa;
+      gcloud secrets versions access ${_KEY_VERSION} --secret="grc-builder" --project=${_KEY_PROJECT}  > /root/.ssh/id_rsa;
     volumes:
     - name: 'ssh'
       path: /root/.ssh
