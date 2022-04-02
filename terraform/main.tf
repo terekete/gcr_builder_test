@@ -2,7 +2,7 @@ resource "google_cloudbuild_trigger" "image_pull_request" {
   provider = google-beta
   project  = var.project_id
   name     = "build-image-rc"
-  filename = "cloud-build/build-image.yaml"
+  filename = "cloudbuild/build.yaml"
 
   substitutions = {
     _DIFF_BUCKET              = google_storage_bucket.diff_bucket.name
@@ -23,7 +23,7 @@ resource "google_cloudbuild_trigger" "image_push" {
   provider = google-beta
   project  = var.project_id
   name     = "release-image"
-  filename = "cloud-build/release-image.yaml"
+  filename = "cloudbuild/release.yaml"
 
   substitutions = {
     _DIFF_BUCKET              = google_storage_bucket.diff_bucket.name
