@@ -33,7 +33,7 @@ steps:
     name: 'gcr.io/cloud-builders/git'
     entrypoint: 'bash'
     args: [
-      './cloud-build/scripts/get_diffs.sh
+      './cloudbuild/scripts/get_diffs.sh
     volumes:
       - name: 'ssh'
         path: /root/.ssh
