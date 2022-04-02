@@ -29,6 +29,45 @@ steps:
     - name: 'ssh'
       path: /root/.ssh
 
+  - id: 'generate-diffs'
+    name: 'gcr.io/cloud-builders/git'
+    entrypoint: 'bash'
+    args: [
+      './cloud-build/scripts/get_diffs.sh
+    volumes:
+      - name: 'ssh'
+        path: /root/.ssh
+    env: [
+      'BASE_REPO_URL=git@github.com:terekete/gcr_builder_test.git',
+      'BASE_BRANCH=${_BASE_BRANCH}',
+      'PR_NUMBER=${_PR_NUMBER}',
+    ]
+  
+#   - id: 'build-images'
+#     name: 'gcr.io/cloud-builders/docker'
+#     entrypoint: bash
+#     args: [
+#       './cloud-build/scripts/build-images.sh'
+#     ]
+#     volumes:
+#       - name: 'ssh'
+#         path: /root/.ssh
+#     env: [
+#       'CONTAINER_IMAGE_REGISTRY=${_CONTAINER_IMAGE_REGISTRY}',
+#     ]
+
+#   - id: 'save-diff' 
+#     name: gcr.io/cloud-builders/gcloud
+#     entrypoint: 'bash'
+#     args:
+#       - -c
+#       - |
+#         echo "Saving diff file to ${_DIFF_BUCKET}"
+#         commit=$(cat commit.txt)
+#         gsutil cp "DIFF_IMAGES.txt" "gs://${_DIFF_BUCKET}/${commit}.txt"
+
+# tags: ['build-release-candidate-images', "pull-${_PR_NUMBER}"]
+
 options:
   substitution_option: 'ALLOW_LOOSE'
 
