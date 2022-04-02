@@ -34,7 +34,7 @@ options:
 
 substitutions:
   _KEY_PROJECT: bi-stg-pineapple-345822
-  _KEY_VERSION: latest
+  _KEY_VERSION: "latest"
   _DIFF_BUCKET: 
   _CONTAINER_IMAGE_REGISTRY: 
   _BASE_BRANCH: 
