@@ -7,7 +7,7 @@ steps:
     args:
     - '-c'
     - |
-      gcloud secrets versions access ${_KEY_VERSION} --secret="rpabot_read_key" --project=${_KEY_PROJECT}  > /root/.ssh/id_rsa;
+      gcloud secrets versions access ${_KEY_VERSION} --secret="github" --project=${_KEY_PROJECT}  > /root/.ssh/id_rsa;
     volumes:
     - name: 'ssh'
       path: /root/.ssh
