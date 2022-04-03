@@ -39,7 +39,7 @@ steps:
         git config user.email "<>"
         git config user.name "git"
         git clone git@github.com:terekete/gcr_builder_test.git
-        cd tf-infra-cio-workbench-image
+        cd gcr_builder_test
         git fetch origin ${BRANCH_NAME}:base
         git checkout base
         git pull
