@@ -65,6 +65,7 @@ steps:
       - |
         echo "Saving diff file to ${_DIFF_BUCKET}"
         commit=$(cat commit.txt)
+        cat DIFF_IMAGES.txt
         gsutil cp "DIFF_IMAGES.txt" "gs://${_DIFF_BUCKET}/${commit}.txt"
 
 tags: ['build-release-candidate-images', "pull-${_PR_NUMBER}"]
