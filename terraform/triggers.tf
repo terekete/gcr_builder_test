@@ -2,7 +2,7 @@ resource "google_cloudbuild_trigger" "image_pull_request" {
   provider = google-beta
   project  = var.project_id
   name     = "build-image-rc"
-  filename = "cloud-build/build-image.yaml"
+  filename = "cloudbuild/build.yaml"
 
   substitutions = {
     _DIFF_BUCKET              = google_storage_bucket.diff_bucket.name
@@ -23,7 +23,7 @@ resource "google_cloudbuild_trigger" "image_push" {
   provider = google-beta
   project  = var.project_id
   name     = "release-image"
-  filename = "cloud-build/release-image.yaml"
+  filename = "cloudbuild/release.yaml"
 
   substitutions = {
     _DIFF_BUCKET              = google_storage_bucket.diff_bucket.name
@@ -37,11 +37,4 @@ resource "google_cloudbuild_trigger" "image_push" {
       branch = "^${var.base_branch}$"
     }
   }
-}
-
-resource "google_storage_bucket" "diff_bucket" {
-  project                     = var.project_id
-  name                        = format("rc-diffs-%s", var.project_id)
-  uniform_bucket_level_access = true
-  location                    = var.region
 }

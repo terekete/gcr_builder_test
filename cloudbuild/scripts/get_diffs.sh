@@ -7,15 +7,15 @@ echo ""
 echo "Running bash version: $bash_version"
 echo ""
 
-git rev-parse HEAD >> commit.txt
-git rev-parse --short HEAD >> short_commit.txt
+git rev-parse HEAD >>commit.txt
+git rev-parse --short HEAD >>short_commit.txt
 
 commit=$(cat commit.txt)
 
 echo "############################"
 echo "Working on commmit: $commit"
 echo "Using base ref: ${BASE_BRANCH}"
-if [[ ! -z "$PR_NUMBER"]]; then
+if [[ ! -z "$PR_NUMBER" ]]; then
   echo "on pull request: #${PR_NUMBER}"
 fi
 echo "############################"
@@ -49,7 +49,6 @@ git fetch origin "${BASE_BRANCH}":base-branch
 git checkout base-branch
 git merge --no-ff feature
 
-
 #!/bin/bash
 build_diff_file="build-diff-file.txt"
 diff=$(git diff --name-only origin/"${BASE_BRANCH}"...HEAD)
@@ -59,15 +58,12 @@ echo "$diff"
 DIFF_IMAGES=""
 DIFF_VERSION_FILE=""
 
-for file in $diff
-do
-  if [[ "$file" =~ ^images/(.+)/VERSION$ ]]
-  then
+for file in $diff; do
+  if [[ "$file" =~ ^images/(.+)/VERSION$ ]]; then
     VERSION_FILE="${BASH_REMATCH[0]}"
     DIFF_IMAGES+="${BASH_REMATCH[1]}\n"
     version=$(cat $VERSION_FILE)
-    if ! [[ "$version" =~ ^([0-9]|[1-9][0-9]+)\.?([0-9]|[1-9][0-9]+)\.?([0-9]|[1-9][0-9]+)$ ]]
-    then
+    if ! [[ "$version" =~ ^([0-9]|[1-9][0-9]+)\.?([0-9]|[1-9][0-9]+)\.?([0-9]|[1-9][0-9]+)$ ]]; then
       echo "ERROR: version file $VERSION_FILE does not contain a valid version number"
       exit 1
     fi
@@ -76,10 +72,9 @@ done
 
 echo "Sorting and keeping unique changes ..."
 echo ""
-printf "$DIFF_IMAGES" | sort | uniq > DIFF_IMAGES.txt
+printf "$DIFF_IMAGES" | sort | uniq >DIFF_IMAGES.txt
 
-if [[ -z "$DIFF_IMAGES" ]]
-then
+if [[ -z "$DIFF_IMAGES" ]]; then
   echo "No images changed"
   exit 0
 else
