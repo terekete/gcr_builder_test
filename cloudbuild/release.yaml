@@ -1,4 +1,8 @@
 steps:
+<<<<<<< HEAD
+=======
+  #retrieve key
+>>>>>>> 24d12857d61e6fba4fe792d2c566b939ed559f3d
   - name: 'gcr.io/cloud-builders/gcloud'
     id: retrieve-read-key
     entrypoint: 'bash'
