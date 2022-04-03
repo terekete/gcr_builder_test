@@ -1,0 +1,88 @@
+steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: retrieve-read-key
+    entrypoint: 'bash'
+    dir: .  
+    args:
+    - '-c'
+    - |
+      gcloud secrets versions access ${_KEY_VERSION} --secret="grc-builder" --project=${_KEY_PROJECT}  > /root/.ssh/id_rsa;
+    volumes:
+    - name: 'ssh'
+      path: /root/.ssh
+  
+  - name: 'gcr.io/cloud-builders/git'
+    id: add-github-key
+    entrypoint: 'bash'
+    dir: .
+    args:
+    - '-c'
+    - |
+      chmod 600 /root/.ssh/id_rsa
+      cat <<EOF >/root/.ssh/config
+      Hostname github.com
+      IdentityFile /root/.ssh/id_rsa
+      EOF
+      ssh-keyscan -t rsa github.com > /root/.ssh/known_hosts
+    volumes:
+    - name: 'ssh'
+      path: /root/.ssh
+
+  # Get the Github COMMIT SHA of the Pull Request
+  - id: 'get-pull-request-sha'
+    name: 'gcr.io/cloud-builders/git'
+    entrypoint: 'bash'
+    args:
+      - -c
+      - |
+        git init
+        git config user.email "<>"
+        git config user.name "git"
+        git clone git@github.com:terekete/gcr_builder_test.git
+        cd gcr_builder_test
+        git fetch origin ${BRANCH_NAME}:base
+        git checkout base
+        git pull
+        echo "$(git log -n 1 --pretty=format:"%P" ${COMMIT_SHA}| cut -d ' ' -f 2)" > /workspace/commit.txt
+        echo "$(git log -n 1 --pretty=format:"%p" ${COMMIT_SHA}| cut -d ' ' -f 2)" > /workspace/short_commit.txt
+        echo "Using the following the COMMIT_SHA and SHORT_SHA:"
+        cat /workspace/commit.txt
+        cat /workspace/short_commit.txt
+    volumes:
+      - name: 'ssh'
+        path: /root/.ssh
+
+  # Download the diff file generated during the build
+  - id: 'download-diff-file'
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: 'bash'
+    args: 
+      - -c
+      - |
+        commit=$(cat /workspace/commit.txt)
+        gsutil cp gs://"${_DIFF_BUCKET}"/"${commit}".txt DIFF_IMAGES.txt
+
+  # Tag images with release tags
+  - id: 'tag-images'
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: 'bash'
+    args: [
+      './cloudbuild/scripts/release-images.sh'
+    ]
+    env: [
+      'CONTAINER_IMAGE_REGISTRY=${_CONTAINER_IMAGE_REGISTRY}',
+    ]
+
+tags: ['release-artifact-to-production']
+
+options:
+  substitution_option: 'ALLOW_LOOSE'
+
+substitutions:
+  _KEY_PROJECT: bi-stg-pineapple-345822
+  _KEY_VERSION: latest
+  _DIFF_BUCKET: rc-diffs-bi-stg-pineapple-345822
+  _CONTAINER_IMAGE_REGISTRY: 
+  _BASE_BRANCH: 
+
+timeout: 10800s
