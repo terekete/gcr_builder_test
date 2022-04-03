@@ -1,5 +1,4 @@
 steps:
-  #retrieve key
   - name: 'gcr.io/cloud-builders/gcloud'
     id: retrieve-read-key
     entrypoint: 'bash'
@@ -39,7 +38,7 @@ steps:
         git init
         git config user.email "<>"
         git config user.name "git"
-        git clone git@github.com:telus/tf-infra-cio-workbench-image.git
+        git clone git@github.com:terekete/gcr_builder_test.git
         cd tf-infra-cio-workbench-image
         git fetch origin ${BRANCH_NAME}:base
         git checkout base
