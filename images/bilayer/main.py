@@ -1134,7 +1134,7 @@ if __name__ == "__main__":
 
     location = 'northamerica-northeast1'
     stack = auto.create_or_select_stack(
-        stack_name=team + '_sa',
+        stack_name=os.getcwd() + '/stack/' + team + '_sa',
         project_name=project,
         program=pulumi_program,
         work_dir='/workspace')
