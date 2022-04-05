@@ -172,7 +172,7 @@ def get_binding_list(list_user, kind):
     return iam_binding_list
 
 
-def buckets():
+def buckets(provider):
     ################## Buckets creation ##################
 
     # Read all buckets yaml
@@ -205,7 +205,7 @@ def buckets():
                 condition=gcp.storage.BucketLifecycleRuleConditionArgs(
                     age=lifecycle_age_days)
             )],
-            opts=pulumi.ResourceOptions(provider=pr)
+            opts=pulumi.ResourceOptions(provider=provider)
         )
 
         # Apply iam binding
@@ -216,7 +216,7 @@ def buckets():
             role='roles/storage.objectViewer',
             members=get_binding_list(parameter['iam_binding'], 'subscribers'),
             opts=pulumi.ResourceOptions(
-                provider=pr,
+                provider=provider,
                 parent=buckets['bucket_{}'.format(parameter['resource_name'])])
         )
         storage.BucketIAMBinding(
@@ -226,7 +226,7 @@ def buckets():
             role='roles/storage.objectAdmin',
             members=get_binding_list(parameter['iam_binding'], 'publishers'),
             opts=pulumi.ResourceOptions(
-                provider=pr,
+                provider=provider,
                 parent=buckets['bucket_{}'.format(parameter['resource_name'])]
             )
         )
@@ -430,7 +430,7 @@ def pulumi_program():
             )
         )
 
-    buckets()
+    buckets(provider=pr)
 # ################## Buckets creation ##################
 
 #     # Read all buckets yaml
