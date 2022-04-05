@@ -172,6 +172,66 @@ def get_binding_list(list_user, kind):
     return iam_binding_list
 
 
+def buckets():
+    ################## Buckets creation ##################
+
+    # Read all buckets yaml
+    list_buckets = list_manifests(root="/workspace/resources/buckets")
+    # Create an empty dataset list to store the dataset resources names
+    buckets = {}
+    for i in range(len(list_buckets)):
+
+        with open(str(list_buckets[i])) as a_yaml_file:
+            parameter = yaml.load(a_yaml_file, Loader=yaml.FullLoader)
+
+        validate_manifest_null(manifest=parameter, file=str(list_buckets[i]))
+        validate_manifest(manifest=parameter, schema_path='/schemas/bucket.py')
+
+        if 'lifecycle_age_days' in parameter:
+            lifecycle_age_days = parameter['lifecycle_age_days']
+        else:
+            lifecycle_age_days = 365
+
+        buckets["bucket_{}".format(parameter['resource_name'])] = storage.Bucket(
+            resource_name='bucket_' + parameter['resource_name'],
+            name=str(project)+'_'+parameter['resource_name'],
+            force_destroy=True,
+            storage_class=parameter['storage_class'],
+            location=location,
+            uniform_bucket_level_access=True,
+            lifecycle_rules=[gcp.storage.BucketLifecycleRuleArgs(
+                action=gcp.storage.BucketLifecycleRuleActionArgs(
+                    type="Delete"),
+                condition=gcp.storage.BucketLifecycleRuleConditionArgs(
+                    age=lifecycle_age_days)
+            )],
+            opts=pulumi.ResourceOptions(provider=pr)
+        )
+
+        # Apply iam binding
+        storage.BucketIAMBinding(
+            resource_name='dataset_read_iam_'+parameter['resource_name'],
+            bucket=buckets['bucket_{}'.format(
+                parameter['resource_name'])].name,
+            role='roles/storage.objectViewer',
+            members=get_binding_list(parameter['iam_binding'], 'subscribers'),
+            opts=pulumi.ResourceOptions(
+                provider=pr,
+                parent=buckets['bucket_{}'.format(parameter['resource_name'])])
+        )
+        storage.BucketIAMBinding(
+            resource_name='dataset_write_iam_'+parameter['resource_name'],
+            bucket=buckets['bucket_{}'.format(
+                parameter['resource_name'])].name,
+            role='roles/storage.objectAdmin',
+            members=get_binding_list(parameter['iam_binding'], 'publishers'),
+            opts=pulumi.ResourceOptions(
+                provider=pr,
+                parent=buckets['bucket_{}'.format(parameter['resource_name'])]
+            )
+        )
+
+
 # Main to run the pulumi script
 def pulumi_program():
 
@@ -370,63 +430,64 @@ def pulumi_program():
             )
         )
 
-################## Buckets creation ##################
+    buckets()
+# ################## Buckets creation ##################
 
-    # Read all buckets yaml
-    list_buckets = list_manifests(root="/workspace/resources/buckets")
-    # Create an empty dataset list to store the dataset resources names
-    buckets = {}
-    for i in range(len(list_buckets)):
+#     # Read all buckets yaml
+#     list_buckets = list_manifests(root="/workspace/resources/buckets")
+#     # Create an empty dataset list to store the dataset resources names
+#     buckets = {}
+#     for i in range(len(list_buckets)):
 
-        with open(str(list_buckets[i])) as a_yaml_file:
-            parameter = yaml.load(a_yaml_file, Loader=yaml.FullLoader)
+#         with open(str(list_buckets[i])) as a_yaml_file:
+#             parameter = yaml.load(a_yaml_file, Loader=yaml.FullLoader)
 
-        validate_manifest_null(manifest=parameter, file=str(list_buckets[i]))
-        validate_manifest(manifest=parameter, schema_path='/schemas/bucket.py')
+#         validate_manifest_null(manifest=parameter, file=str(list_buckets[i]))
+#         validate_manifest(manifest=parameter, schema_path='/schemas/bucket.py')
 
-        if 'lifecycle_age_days' in parameter:
-            lifecycle_age_days = parameter['lifecycle_age_days']
-        else:
-            lifecycle_age_days = 365
+#         if 'lifecycle_age_days' in parameter:
+#             lifecycle_age_days = parameter['lifecycle_age_days']
+#         else:
+#             lifecycle_age_days = 365
 
-        buckets["bucket_{}".format(parameter['resource_name'])] = storage.Bucket(
-            resource_name='bucket_' + parameter['resource_name'],
-            name=str(project)+'_'+parameter['resource_name'],
-            force_destroy=True,
-            storage_class=parameter['storage_class'],
-            location=location,
-            uniform_bucket_level_access=True,
-            lifecycle_rules=[gcp.storage.BucketLifecycleRuleArgs(
-                action=gcp.storage.BucketLifecycleRuleActionArgs(
-                    type="Delete"),
-                condition=gcp.storage.BucketLifecycleRuleConditionArgs(
-                    age=lifecycle_age_days)
-            )],
-            opts=pulumi.ResourceOptions(provider=pr)
-        )
+#         buckets["bucket_{}".format(parameter['resource_name'])] = storage.Bucket(
+#             resource_name='bucket_' + parameter['resource_name'],
+#             name=str(project)+'_'+parameter['resource_name'],
+#             force_destroy=True,
+#             storage_class=parameter['storage_class'],
+#             location=location,
+#             uniform_bucket_level_access=True,
+#             lifecycle_rules=[gcp.storage.BucketLifecycleRuleArgs(
+#                 action=gcp.storage.BucketLifecycleRuleActionArgs(
+#                     type="Delete"),
+#                 condition=gcp.storage.BucketLifecycleRuleConditionArgs(
+#                     age=lifecycle_age_days)
+#             )],
+#             opts=pulumi.ResourceOptions(provider=pr)
+#         )
 
-        # Apply iam binding
-        storage.BucketIAMBinding(
-            resource_name='dataset_read_iam_'+parameter['resource_name'],
-            bucket=buckets['bucket_{}'.format(
-                parameter['resource_name'])].name,
-            role='roles/storage.objectViewer',
-            members=get_binding_list(parameter['iam_binding'], 'subscribers'),
-            opts=pulumi.ResourceOptions(
-                provider=pr,
-                parent=buckets['bucket_{}'.format(parameter['resource_name'])])
-        )
-        storage.BucketIAMBinding(
-            resource_name='dataset_write_iam_'+parameter['resource_name'],
-            bucket=buckets['bucket_{}'.format(
-                parameter['resource_name'])].name,
-            role='roles/storage.objectAdmin',
-            members=get_binding_list(parameter['iam_binding'], 'publishers'),
-            opts=pulumi.ResourceOptions(
-                provider=pr,
-                parent=buckets['bucket_{}'.format(parameter['resource_name'])]
-            )
-        )
+#         # Apply iam binding
+#         storage.BucketIAMBinding(
+#             resource_name='dataset_read_iam_'+parameter['resource_name'],
+#             bucket=buckets['bucket_{}'.format(
+#                 parameter['resource_name'])].name,
+#             role='roles/storage.objectViewer',
+#             members=get_binding_list(parameter['iam_binding'], 'subscribers'),
+#             opts=pulumi.ResourceOptions(
+#                 provider=pr,
+#                 parent=buckets['bucket_{}'.format(parameter['resource_name'])])
+#         )
+#         storage.BucketIAMBinding(
+#             resource_name='dataset_write_iam_'+parameter['resource_name'],
+#             bucket=buckets['bucket_{}'.format(
+#                 parameter['resource_name'])].name,
+#             role='roles/storage.objectAdmin',
+#             members=get_binding_list(parameter['iam_binding'], 'publishers'),
+#             opts=pulumi.ResourceOptions(
+#                 provider=pr,
+#                 parent=buckets['bucket_{}'.format(parameter['resource_name'])]
+#             )
+#         )
 
 ################## Datasets creation ##################
 
