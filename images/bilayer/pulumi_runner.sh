@@ -14,4 +14,4 @@ echo "PROJECT: ${project}"
 echo "STATE: ${state_bucket}"
 echo "PROJECT TYPE: ${project_type}"
 echo "BUILD SA: ${build_sa}"
-python /sa.py $team $project $project_type $build_sa
+python /main.py $team $project $project_type $build_sa
