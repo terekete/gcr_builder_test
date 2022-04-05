@@ -185,7 +185,8 @@ def buckets(provider):
             parameter = yaml.load(a_yaml_file, Loader=yaml.FullLoader)
 
         validate_manifest_null(manifest=parameter, file=str(list_buckets[i]))
-        validate_manifest(manifest=parameter, schema_path='/schemas/bucket.py')
+        validate_manifest(manifest=parameter,
+                          schema_path='/src/schemas/bucket.py')
 
         if 'lifecycle_age_days' in parameter:
             lifecycle_age_days = parameter['lifecycle_age_days']
