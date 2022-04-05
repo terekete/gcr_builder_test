@@ -52,7 +52,6 @@ steps:
       - name: 'ssh'
         path: /root/.ssh
 
-  # Download the diff file generated during the build
   - id: 'download-diff-file'
     name: gcr.io/cloud-builders/gcloud
     entrypoint: 'bash'
@@ -61,7 +60,7 @@ steps:
       - |
         commit=$(cat /workspace/commit.txt)
         gsutil cp gs://"${_DIFF_BUCKET}"/"${commit}".txt DIFF_IMAGES.txt
-  # Tag images with release tags
+
   - id: 'tag-images'
     name: gcr.io/cloud-builders/gcloud
     entrypoint: 'bash'
