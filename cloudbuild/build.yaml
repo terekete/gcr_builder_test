@@ -72,6 +72,7 @@ tags: ['build-release-candidate-images', "pull-${_PR_NUMBER}"]
 options:
   substitution_option: 'ALLOW_LOOSE'
 
+
 substitutions:
   _KEY_PROJECT: bi-stg-pineapple-345822
   _KEY_VERSION: latest
